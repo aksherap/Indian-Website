@@ -1,0 +1,207 @@
+#Create the graphical user interface and display messages to the user
+import tkinter as tk
+from tkinter import messagebox
+#Imports Image & ImageTk from PIL module to handle image files and display them into the application
+from PIL import Image, ImageTk
+
+#defines the class called "Dancer Quiz" My collaborator helped in almost half of the section of the class DancerQuiz
+class DancerQuiz(tk.Frame):
+    def __init__(self, master=None):
+      #initializes the "Dance Quiz" object and its properties
+        super().__init__(master)
+      #displays the frame on the screen
+        self.pack()
+        self.create_start_page()
+
+    def create_start_page(self):
+       # Load the image
+        image = Image.open("dancer.jpg") #Citations: Dancer Picture from https://www.pinterest.com/pin/31173422415079524/
+        # Calculate the aspect ratio of the image
+        width, height = image.size
+        aspect_ratio = height / width
+    # Calculate the new height of the image to fit the label width
+        label_width = 200  # The width of the label is 200 pixels
+        new_height = int(label_width * aspect_ratio)
+    # Resize the image
+        image = image.resize((label_width, new_height))
+    # Convert the image to a Tkinter-compatible photo image
+        photo = ImageTk.PhotoImage(image)
+    # Create a label with the photo image
+        image_label = tk.Label(self, image=photo)
+        image_label.image = photo  # Keep a reference to the photo image to prevent garbage collection
+        image_label.pack(pady=0)#padding will be 0 pixels for the image
+ #From tk.Label(self,...).. is the part where the rest of the code is from myself    
+#Title label has background color in pink and is in Arial 10 size font and padding will be 0 pixels
+
+        tk.Label(self, text="Welcome to the Dancer Quiz!", font=("Arial", 10), bg="pink").pack(pady=0)
+       #The start label has background color in white and is in Arial 10 size font and padding will be 0 pixels
+        tk.Button(self, text="Start Quiz", command=self.start_quiz, font=("Arial", 10), bg="white").pack(pady=0)
+     
+
+#this destroys the "start_quiz" page and directs the user to page with all the questions that will help them deteremine what type of dancer they are
+    def start_quiz(self):
+        self.destroy()
+        QuestionsPage(self.master)
+
+#defines the class called "QuestionsPage"
+class QuestionsPage(tk.Frame):
+    def __init__(self, master=None):
+      #initializes the "QuestionsPage" object and its properties
+        super().__init__(master)
+      #displays the frame on the screen
+        self.pack()
+        self.create_questions_page()
+    #6 Questions with 4 options each to determine the type of dancer the user & defines method called "create_questions_page"
+    def create_questions_page(self):
+      #first element in each tuple is a string that represents the question prompt and second element in each tuple is a a list of four strings that represent the answer options for each question prompt
+        self.questions = [
+            ("What type of music do you listen to?", ["Pop", "Rock", "Jazz", "Traditional"]),
+            ("What is your favorite movie genre?", ["Thriller", "Romantic", "Fantasy", "Comedy"]),
+            ("How do you dress?", ["Vintage", "Casual", "Sportsy", "Preppy"]),
+            ("What is your favorite color?", ["Blue", "Purple", "Red", "Black"]),
+            ("What do you do in your free time?", ["Use social media", "Hang out with friends", "Shopping", "Painting"]),
+            ("What is your favorite subject?", ["Math", "Science", "English", "History"])
+        ]
+      #creates list called "self.answers" with tkinter IntVar which is type of variable that holds integers
+        self.answers = [tk.IntVar() for _ in self.questions]
+#enumerate is used to loop each answer option and "i" is used to keep track of the indext of the current answer option 
+        for i, (prompt, options) in enumerate(self.questions):
+#The label for each of the question has background color of pink and is in font Arial size 6 and padding from x and y axis will 0 pixels and widget will be left-justified within its allocated space
+            tk.Label(self, text=f"{i+1}. {prompt}", font=("Arial", 6), bg="pink").pack(padx=0, pady=0, anchor="w")
+ #enumerate is used to loop each answer option and "j" is used to keep track of the indext of the current answer option  
+            for j, option in enumerate(options):
+              #Displays radiobuttons for each of the four answer options and four answer options will be in font Arial size 6 and padding from x and y axis will 0 pixels and widget will be left-justified within its allocated space.
+                tk.Radiobutton(self, text=f"{j+1}. {option}", variable=self.answers[i], value=j+1, font=("Arial", 6)).pack(padx=0, pady=0, anchor="w")
+              
+#Will calculate the final score of user based on which of the 4 options they picked from the 6 questions
+        tk.Button(self, text="Calculate", command=self.calculate_score, font=("Arial", 10), bg="white").pack(pady=10)
+      #Button is in white background and the word "Calculate" is in Arial size 10 with padding of 10 pixels
+        
+    #Makes sure the user answers all the questions    
+    def calculate_score(self):
+      #sum function and generator expression are used count the number of questions answered. if the value of the answer is not 0 then a count of 1 will be added to the total count of the questions answered
+        answered_questions = sum(1 for answer in self.answers if answer.get() != 0)
+      #If the number of questions answered is less than the total number of questions in the quiz then using the tkiner message box it will send message to user that they didn't answer all the questions
+        if answered_questions < len(self.questions):
+            tk.messagebox.showwarning("Warning", "Please answer all questions before calculating your score.")
+          #it returns without calculating the score if the user doesn't answer all the questions
+            return
+#Calculates user's total score using the score_type_map. Each type of dancer is assigned a specific integer value. 
+        total_score = sum(answer.get() for answer in self.answers)
+        score_type_map = {
+            6: "Hiphop dancer",
+            10: "Ballet dancer",
+            16: "Bollywood dancer",
+            18: "Salsa dancer",
+            24: "Traditional dancer"
+        }
+      #It's iterating over score_type_map dictionary and comparing total_score with the users predefined score
+        for score, type_name in score_type_map.items():
+          #if total score is greater than or equal to the specific score it gives it sets it the corresponding type of dancer they are
+            if total_score >= score:
+                type_ = type_name
+        #it keeps iterating till it finds a score that is greater than total_score and then it breaks the loop
+            else:
+                break
+              
+#this will destroy the questions page and direct the user to the results page where they can see what type of dancer they are
+        self.destroy()
+        ResultsPage(self.master, type_)
+    
+  
+# Once the user clicks restart, the Results Page will be destroyed and new instance will be created which is the going back to the first page which is the Dancer Quiz Title Page
+    def restart_quiz(self):
+        self.destroy()
+        DancerQuiz(self.master)
+
+#defines the class called "ResultsPage"
+class ResultsPage(tk.Frame):
+    def __init__(self, master=None, type_=""):
+       #initializes the "Dance Quiz" object and its properties
+        super().__init__(master)
+      #displays the frame on the screen
+        self.pack()
+        self.create_results_page(type_)
+  #Creates result page with two labels that display the type of dancer the user is
+    def create_results_page(self, type_):
+        #label to display the user's score using Arial font in size 24 with padding of 10 pixels
+        tk.Label(self, text="You are a:", font=("Arial", 24)).pack(pady=10)
+      #Label for the text version for the score of the user to let them know the type of dancer they using Arial font in size 24 with padding of 10 pixels
+        tk.Label(self, text=type_, font=("Arial", 24)).pack(pady=10)
+
+        #Determines the type of dancer the user based on the total score
+        images = {
+            "Hiphop dancer": "hiphop.jpg",
+  #Citations: Hiphop Picture from https://www.pinterest.com/pin/153544668537627739/
+            "Ballet dancer": "ballet.jpg",
+  #Citations: Ballet Picture from https://www.pinterest.com/pin/704391197948417937/
+            "Bollywood dancer": "bollywood.jpg",
+  #Citations: Bollywood Picture from https://www.pinterest.com/pin/351843789613825158/
+            "Salsa dancer": "salsa.jpg",
+  #Citations: Salsa Picture from https://www.pinterest.com/pin/45458277477959386/
+            "Traditional dancer": "traditional.jpg"
+    #Citations: Traditional Picture from https://www.facebook.com/Chirphy/photos/a.177313876077565/914291255713153/?type=3
+        }
+      #Adds image to results page based on the type of dancer the user gets
+        if type_ in images:
+            # Load the image for the dancer type
+            image = Image.open(images[type_])
+            # Calculate the aspect ratio of the image
+            width, height = image.size
+            aspect_ratio = height / width
+            # Calculate the new height of the image to fit the label width
+            label_width = 200  # The width of the label is 200 pixels
+            new_height = int(label_width * aspect_ratio)
+            # Resize the image
+            image = image.resize((label_width, new_height))
+            # Convert the image to a Tkinter-compatible photo image
+            photo = ImageTk.PhotoImage(image)
+            #A label is created with the photo image
+            image_label = tk.Label(self, image=photo)
+            image_label.image = photo  # Keep a reference to the photo image to prevent garbage collection
+            image_label.pack(pady=20)#image_label has padding of 20 pixels
+  #if the results are not right the program will let the user know that they could not determine what type of dancer they are. It will tell user in Arial 16 size font.
+        else:
+          #if the user's results were not able to be calculate they will get a message in Arial size 16 font with padding of 20 pixels
+            tk.Label(self, text="Sorry, we could not determine your dancer type.", font=("Arial", 16)).pack(pady=20)
+      
+
+        # Create a button to restart the quiz
+        tk.Button(self, text="Restart Quiz", command=self.restart_quiz, font=("Arial", 16), bg="white").pack(pady=20)
+      #The background color of the label is white and the words will be in Arial size 16 font with padding of 20 pixels
+
+    def restart_quiz(self):
+        # Destroy the results page
+        self.destroy()
+
+        # Create a new instance of the DancerQuiz class to restart the quiz
+        DancerQuiz(self.master)
+
+root = tk.Tk()
+# Open the image file and resize it
+image = Image.open("gradient.png")
+# Citations: Gradient picture by Codioful from https://www.pexels.com/photo/colorful-gradient-6985001/
+image = image.resize((root.winfo_screenwidth(), root.winfo_screenheight()))
+
+# Create a PhotoImage object from the resized image
+bg_image = ImageTk.PhotoImage(image)
+
+# Get the size of the screen
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+# Create a label widget with the image as its background
+bg_label = tk.Label(root, image=bg_image)
+bg_label.place(x=0, y=0, width=screen_width, height=screen_height)
+
+# Set the size of the main window to match the screen size
+root.geometry(f"{screen_width}x{screen_height}")
+app = DancerQuiz(master=root)
+app.mainloop()
+
+
+
+
+
+
+
