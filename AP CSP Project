@@ -4,7 +4,7 @@ from tkinter import messagebox
 #Imports Image & ImageTk from PIL module to handle image files and display them into the application
 from PIL import Image, ImageTk
 
-#defines the class called "Dancer Quiz" My collaborator helped in almost half of the section of the class DancerQuiz
+#defines the class called "Dancer Quiz" 
 class DancerQuiz(tk.Frame):
     def __init__(self, master=None):
       #initializes the "Dance Quiz" object and its properties
@@ -29,8 +29,7 @@ class DancerQuiz(tk.Frame):
     # Create a label with the photo image
         image_label = tk.Label(self, image=photo)
         image_label.image = photo  # Keep a reference to the photo image to prevent garbage collection
-        image_label.pack(pady=0)#padding will be 0 pixels for the image
- #From tk.Label(self,...).. is the part where the rest of the code is from myself    
+        image_label.pack(pady=0)#padding will be 0 pixels for the image  
 #Title label has background color in pink and is in Arial 10 size font and padding will be 0 pixels
 
         tk.Label(self, text="Welcome to the Dancer Quiz!", font=("Arial", 10), bg="pink").pack(pady=0)
